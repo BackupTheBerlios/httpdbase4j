@@ -1,0 +1,111 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+</head>
+<body>
+<h1>HttpdBase4J</h1>
+<h2>Introduction</h2>
+<p>
+HttpdBase4J is an embeddable Java web server framework that supports HTTP, HTTPS, 
+templated content and serving content from inside an archive. The classes are 
+easy to extend as they utilize the Hollywood 'don't call us, we'll call you' 
+principle to allow the user to overide the framework behaviour during all 
+the different phases of the HTTP transaction. <b>Note:</b>HttpdBase4J uses the 
+Java 6 <i>com.sun.net.httpserver</i> classes so it won't currently work under 
+earlier versions of Java.
+</p>
+<h2>Usage Examples</h2>
+<p>
+The simplest use case is to create an embedded web server on port 8088 with its 
+home directory at <i>htdocs</i> in the local filesystem and a root url at / ie 
+/ maps onto htdocs:
+</p>
+<pre>
+<span>homeDir = new java.io.File("./htdocs");</span>
+<span>httpd = new FileHttpd(homeDir, 10); // Creates a server with a threadpool of 10</span>
+<span>httpd.setLogger(System.err); // Log to console </span>
+<span>httpd.start(8088, "/");</span>
+</pre>
+<p>
+Creating a HTTPS server equivalent the the HTTP server above requires passing a 
+keystore and password to <i>start.</i> Passing <i>null</i> will generate a 
+certificate free keystore if you only need the encryption capabilities of HTTPS 
+and not the certificate capability:
+</p>
+<pre>
+<span>httpd = new FileHttpd(homeDir, 10);</span>      
+<span>m_httpd.start(8089, "/", keystore, password);</span>
+</pre>
+<p>
+Serving content from inside an archive or from a jar or zip in the Java classpath
+requires creating an ArchiveHttpd instance instead of a FileHttpd. To serve content
+located in a jar or zip in the class path you need only specify the resource directory 
+in the classpath where the content islocated, for example:
+</p>
+<pre>
+<span>httpd = new ArchiveHttpd("/resources/htdocs", 10);</span>
+<span>httpd.start(8088, "/");</span>
+</pre>
+<p>
+To serve content from within a specific archive specify the archive as a Java 
+File when constructing the ArchiveHttpd: 
+</p>
+<pre>
+<span>httpd = new ArchiveHttpd(new File("content.zip"), "/resources/htdocs", 10);</span>
+<span>httpd.start(8088, "/");</span>
+</pre>
+<p>
+Creating web content using templates is also supported. Currently only the 
+StringTemplate library 
+(<a href="http://www.stringtemplate.org">http://www.stringtemplate.org</a>) is 
+is supported but it should be relatively easy to create user derived classes 
+for other template implementations. To create an HTTP embedded web server on 
+serving templated content from resources/htdocs in the classpath and having 
+a template file handler (A Java class implenting the Templatable interface that
+is used to fill the templates) in net.homeip.donaldm.test.templates.
+</p>
+<pre>
+<span>httpd = new ArchiveHttpd("resources/htdocs", 10);</span>
+<span>StringTemplateHandler stHandler = new ArchiveStringTemplateHandler(httpd,</span> 
+<span>"net.homeip.donaldm.test.templates");</span>
+<span>httpd.addHandler(".st", stHandler); // .st extension = template files</span>
+<span>httpd.start(m_port, "/");</span>
+</pre>
+<p>
+The HTTP transaction handling can be customized at any point by overiding any of 
+the methods in the HttpHandleable interface or by overiding <i>onCreateRequestHandler</i>
+in Httpd in order to provide your own request handler. A simple example of
+overiding HttpHandleable methods: 
+</p>
+<pre>
+<span>httpd = new TestOverideHttpd(m_homeDir, 10);</span>
+<span>httpd.start(m_port, "/");</span>
+<span></span>
+<span>class TestOverideHttpd</span>
+<span>{</span>
+<span>&nbsp;&nbsp;&nbsp;public HttpResponse onServeHeaders(long id, HttpExchange ex, Request request)</span>
+<span>&nbsp;&nbsp;&nbsp;{</span>
+<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Create or amend content</span>
+<span>&nbsp;&nbsp;&nbsp;}</span>
+<span>&nbsp;&nbsp;&nbsp;public InputStream onServeBody(long id, HttpExchange ex, Request request)</span>
+<span>&nbsp;&nbsp;&nbsp;{</span>
+<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;//Return amended or created content</span>
+<span>&nbsp;&nbsp;&nbsp;}</span>
+<span>}</span>
+</pre>
+<h2>UML Class Diagram</h2>
+<p>
+The Templating classes are presented separately to reduce clutter.
+</p>
+<p>
+<a href="uml.png">Main Class Diagram</a>
+</p>
+<p>
+<a href="templ.png">Templating Class Diagram</a>
+</p>
+</body>
+</html>
