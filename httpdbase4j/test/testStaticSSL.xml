@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "testng-1.0.dtd" >
+<suite name="StaticSSLTest" verbose="1">
+   <parameter name="port" value="8088"/>
+   <parameter name="home-dir" value="test/htdocs"/>
+
+   <test name="TestStaticSSL">
+      <groups>
+         <run>
+            <include name="staticssl"/>
+         </run>
+      </groups>
+      <classes>
+         <class name="net.homeip.donaldm.testng.TestHttpd" />
+      </classes>
+   </test>
+</suite>

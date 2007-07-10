@@ -936,7 +936,9 @@ abstract public class Httpd implements HttpHandleable, Postable
    {
       if (m_defaultFiles == null)
          m_defaultFiles = new ArrayList<String>();
-      m_defaultFiles.add(file);
+      file = file.trim();
+      if (! m_defaultFiles.contains(file))
+         m_defaultFiles.add(file);
    }
 
    static private PrintStream m_logStream   = null;

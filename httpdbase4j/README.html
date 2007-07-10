@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+</head>
+<body>
+<p>
+HttpdBase4J is an embeddable Java web server framework that supports HTTP, HTTPS, 
+templated content and serving content from inside an archive. The classes are 
+easy to extend as they utilize the Hollywood 'don't call us, we'll call you' 
+principle to allow the user to overide the framework behaviour during all 
+the different phases of the HTTP transaction. <b>Note:</b>HttpdBase4J uses the 
+Java 6 <i>com.sun.net.httpserver</i> classes so it won't currently work under 
+earlier versions of Java.
+</p>
+<p><b>Homepage:</b> httpdbase4j.berlios.de</p>
+<h2>Dependencies</h2>
+<h3>TrueZip</h3>
+<p>
+Initially HttpdBase4J used standard Java resource stream access to serve content from
+jars within the classpath, but TrueZip allowed the simplification and generalization of
+this feature to multiple archive types not necessarily within the classpath.
+</p>
+<p>
+URL: <a href="https://truezip.dev.java.net/">https://truezip.dev.java.net</a>
+</p>
+<p>
+License:<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>
+</p>
+<h3>StringTemplate</h3>
+<p>
+StringTemplate is a Java template engine used by HttpdBase4J for creating templated content.
+</p>
+<p>
+URL: <a href="http://www.stringtemplate.org/">http://www.stringtemplate.org/</a>
+</p>
+<p>
+License:<a href="http://www.stringtemplate.org/license.html">BSD License]</a>
+</p>
+<h3>JCharDet</h3>
+<p>
+Jchardet is a java port of the source from Mozilla's automatic charset detection algorithm. 
+HttpdBase4J uses it to detect character sets of html pages.
+</p>
+<p>
+URL: <a href="http://jchardet.sourceforge.net/">http://jchardet.sourceforge.net/</a>
+</p>
+<p>
+License:<a href="http://www.mozilla.org/MPL/">Mozilla Public License</a>
+</p>
+<h3>Antlr</h3>
+<p>
+ANTLR is a language tool that provides a framework for constructing recognizers, interpreters,
+compilers, and translators from grammatical descriptions. Antlr is used by StringTemplate and
+is not used directly by HttpdBase4J.
+</p>
+<p>
+URL: <a href="http://www.antlr.org/">http://www.antlr.org/</a>
+</p>
+<p>
+License:<a href="http://www.antlr.org/license.html">BSD License]</a>
+</p>
+<h3>Ant</h3>
+<p>
+Ant is a Java build tool. It is used internally by TrueZip to access tar archives.
+</p>
+<p>
+URL: <a href="http://ant.apache.org/">http://ant.apache.org/</a>
+</p>
+<p>
+License:<a href="http://ant.apache.org/license.html"> The Apache Software License Version 2.0</a>
+</p>
+</body>
+</html>

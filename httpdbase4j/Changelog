@@ -1,0 +1,16 @@
+0.1   2007-07-08   Donald Munro (donaldmunro at gmail dot com)
+   Initial checkin
+
+0.2   2007-07-10   Donald Munro (donaldmunro at gmail dot com)
+   Template class instantiation catches NoClassDefFoundError (seemingly only thrown in
+      Windoze).
+   Moved template class instantiation to StringTemplateHandler.java 
+      (StringTemplateHandler._instantiateTemplateClass) and modified 
+      FileStringTemplateHandler.getTemplateInstance  and 
+      ArchiveStringTemplateHandler.getTemplateInstance accordingly.
+   Fixed FileRequest copy constructor to use getPath instead of getAbsolutePath File method.
+   Fixed FileRequest copy constructor to check if filename starts with File.separator in 
+      addition to / (Windoze fix).
+   Documentation and web site updates.
+   Added Readme file to CVS
+   Added Changelog

@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "testng-1.0.dtd" >
+<suite name="templateMultiJarTest" verbose="1">
+   <test name="TestMultiTemplateJar">
+      <groups>
+         <run>
+            <include name="templatemultijar"/>
+         </run>
+      </groups>
+      <classes>
+         <class name="net.homeip.donaldm.testng.TestHttpd" />
+      </classes>
+   </test>
+</suite>

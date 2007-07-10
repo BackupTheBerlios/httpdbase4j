@@ -173,29 +173,17 @@ public class ArchiveStringTemplateHandler extends StringTemplateHandler
       try
       {
          String className = templateName;
-         Class C = null;
-         try
-         {
-            C = Class.forName(classPackage + templateName);         
-         }
-         catch (ClassNotFoundException e)
-         {
-            C = null;            
-         }
+         Class C = _instantiateTemplateClass(classPackage + templateName);
          if (C == null)
          {
             templateName = templateName.substring(0, 1).toUpperCase() + 
                            templateName.substring(1).toLowerCase();
-            C = Class.forName(classPackage + templateName);         
+            C = _instantiateTemplateClass(classPackage + templateName);         
          }   
+         if (C == null)
+            return null;
          Templatable instance = (Templatable) C.newInstance();
          return instance;
-      }
-      catch (ClassNotFoundException e)
-      {
-         Httpd.Log(Httpd.LogLevel.ERROR, "Class " + classPackage + 
-                     templateName + " was not found ", e);
-         return null;
       }
       catch (InstantiationException e)
       {

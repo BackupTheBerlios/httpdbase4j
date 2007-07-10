@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "testng-1.0.dtd" >
+<suite name="StaticTest" verbose="1">
+   <parameter name="port" value="8088"/>
+   <parameter name="home-dir" value="test/htdocs"/>
+
+   <test name="TestStatic">
+      <groups>
+         <run>
+            <include name="static"/>
+         </run>
+      </groups>
+      <classes>
+         <class name="net.homeip.donaldm.testng.TestHttpd" />
+      </classes>
+   </test>
+</suite>

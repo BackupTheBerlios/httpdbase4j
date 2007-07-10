@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "testng-1.0.dtd" >
+<suite name="templateSingleTest" verbose="1">
+   <test name="TestSingleTemplate">
+      <groups>
+         <run>
+            <include name="templatesingle"/>
+         </run>
+      </groups>
+      <classes>
+         <class name="net.homeip.donaldm.testng.TestHttpd" />
+      </classes>
+   </test>
+</suite>

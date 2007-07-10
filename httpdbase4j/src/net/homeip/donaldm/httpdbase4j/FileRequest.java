@@ -91,7 +91,7 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
       String home = m_homeDir.getAbsolutePath();
       String filePath = "";
       if (f != null)
-         filePath = f.getAbsolutePath();
+         filePath = f.getPath();
       if (filePath.startsWith(home))
       {
          if (filePath.length() > home.length())
@@ -125,7 +125,7 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
       String home = m_homeDir.getAbsolutePath();
       String filePath = "";
       if (f != null)
-         filePath = f.getAbsolutePath();
+         filePath = f.getPath();
       else
          filePath = request.getPath();
       filePath = filePath.replace('/', File.separatorChar);
@@ -180,13 +180,12 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
             fileName = fileName.replaceFirst("\\.", requestResource);
          }
          
-         String s = m_homeDir.getAbsolutePath();
          int p =-1;
-         if (fileName.startsWith(s))
-            p = fileName.indexOf(s) + s.length();
+         if (fileName.startsWith(homeDir))
+            p = fileName.indexOf(homeDir) + homeDir.length();
          else
          {
-            s = m_homeDir.getPath();
+            String s = m_homeDir.getPath();
             if (fileName.startsWith(s))
                p = fileName.indexOf(s) + s.length();
          }
@@ -198,7 +197,7 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
       fileName = fileName.trim();
       if (fileName.length() == 0)
          fileName = "/";
-      if (fileName.startsWith("/"))
+      if ( (fileName.startsWith("/")) || (fileName.startsWith(File.separator)) )
       {
          if (fileName.length() > 1)
             m_path = fileName.substring(1);

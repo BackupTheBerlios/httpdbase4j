@@ -87,7 +87,7 @@ public class FileStringTemplateHandler extends StringTemplateHandler
          template = m_templateGroup.getInstanceOf(templateName);
       return template;
    }
-
+   
    /**
     *  @inheritDoc
     */   
@@ -116,29 +116,18 @@ public class FileStringTemplateHandler extends StringTemplateHandler
       try
       {
          String className = templateName;
-         Class C = null;
-         try
-         {
-            C = Class.forName(classPackage + templateName);         
-         }
-         catch (ClassNotFoundException e)
-         {
-            C = null;            
-         }
-         if (C == null) // Try first letter uppercased 
-         {
+         Class C = _instantiateTemplateClass(classPackage + templateName);         
+         
+         if (C == null) 
+         {  // Try first letter uppercased 
             templateName = templateName.substring(0, 1).toUpperCase() + 
                            templateName.substring(1).toLowerCase();
-            C = Class.forName(classPackage + templateName);         
+            C = _instantiateTemplateClass(classPackage + templateName);
          }   
+         if (C == null) 
+            return null;
          Templatable instance = (Templatable) C.newInstance();
          return instance;
-      }
-      catch (ClassNotFoundException e)
-      {
-         Httpd.Log(Httpd.LogLevel.ERROR, "Class " + classPackage + 
-                     templateName + " was not found ", e);
-         return null;
       }
       catch (InstantiationException e)
       {

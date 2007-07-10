@@ -134,6 +134,7 @@ abstract public class StringTemplateHandler
       m_httpd = httpd;
       m_templateJavaPackage = templateJavaPackage;
       m_templateProcessor = this;
+      m_httpd.addDefaultFile("index.st");
    }
    
    /**
@@ -153,8 +154,9 @@ abstract public class StringTemplateHandler
    {
       if (templateProcessor == null)
          throw new IllegalArgumentException("Template processor is null");
-      m_httpd = httpd;
+      m_httpd = httpd;      
       m_templateProcessor = templateProcessor;
+      m_httpd.addDefaultFile("index.st");
    }
    
    abstract protected StringTemplate getTemplate(Request request);
@@ -443,6 +445,31 @@ abstract public class StringTemplateHandler
    public String onListDirectory(Request request)
    {
       return m_httpd.onListDirectory(request);
+   }
+   
+   protected Class _instantiateTemplateClass(String className)
+   //-------------------------------------------------
+   {
+      Class C = null;
+      try
+      {
+         C = Class.forName(className);         
+      }
+      catch (ClassNotFoundException e)
+      {
+         C = null;            
+      }
+      catch (NoClassDefFoundError e)
+      {
+         C = null;            
+      }
+      catch (Exception e)
+      {
+         C = null;
+         Httpd.Log(Httpd.LogLevel.ERROR, "Exception instantiating " + className,
+                   e);
+      }
+      return C;
    }
 
 }

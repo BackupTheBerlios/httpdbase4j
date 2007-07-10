@@ -169,6 +169,7 @@ public class Http
    {
       m_mimeExtensionMap = new HashMap<String, String>();
       m_mimeExtensionMap.put("html", "text/html" );
+      m_mimeExtensionMap.put("htm", "text/html" );
       m_mimeExtensionMap.put("st", "text/html" );
       m_mimeExtensionMap.put("zip", "application/x-zip-compressed");
       m_mimeExtensionMap.put("gif", "image/gif" );
@@ -230,14 +231,9 @@ public class Http
          if (br != null)
             try { br.close(); }  catch (Exception e) {}
       }
-      /*
-      Set<Entry<String, String>> set = m_mimeExtensionMap.entrySet();
-      for (Iterator<Entry<String, String>> it = set.iterator(); it.hasNext();)
-      {
-         Entry<String, String> entry = it.next();
-         System.out.println(entry.getKey() + " = " + entry.getValue());
-      }
-      */
+      m_mimeExtensionMap.put("chm", "application/chm");
+      m_mimeExtensionMap.put("djvu", "image/x.djvu");
+      m_mimeExtensionMap.put("djv", "image/x.djvu");      
    }
    
    /**

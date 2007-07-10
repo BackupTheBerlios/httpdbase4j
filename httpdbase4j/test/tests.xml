@@ -1,0 +1,28 @@
+
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="TestTemplates" verbose="1">
+	 <parameter name="port" value="8086"/>
+	 <parameter name="home-dir" value="htdocs"/>
+	 <parameter name="template-dir" value="templates"/>
+   
+   <test name="TestClassPerTemplate">
+      <groups>
+         <run>
+            <include name="ClassPer"/>
+         </run>
+      </groups>
+      <classes>
+         <class name="net.homeip.donaldm.testng.TestStringTemplateHTTPD" />
+      </classes>
+   </test>
+   <test name="TestOneClass">
+      <groups>
+         <run>
+            <include name="OneClass"/>
+         </run>
+      </groups>
+      <classes>
+         <class name="net.homeip.donaldm.testng.TestStringTemplateHTTPD" />
+      </classes>
+   </test>
+</suite>
