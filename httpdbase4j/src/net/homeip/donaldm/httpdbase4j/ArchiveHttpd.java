@@ -320,7 +320,7 @@ public class ArchiveHttpd extends Httpd implements HttpHandleable, Postable
    {
       ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
       URL[] urls = ((URLClassLoader)sysClassLoader).getURLs();
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       for(int i=0; i< urls.length; i++)
       {
          sb.append(urls[i].getFile());

@@ -62,6 +62,13 @@ import com.sun.net.httpserver.HttpsParameters;
 import com.sun.net.httpserver.HttpsServer;
 
 import de.schlichtherle.io.FileInputStream;
+import java.net.URL;
+import java.security.SecureRandom;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * An embeddable Java web server that supports HTTP, HTTPS, templated
@@ -503,7 +510,40 @@ abstract public class Httpd implements HttpHandleable, Postable
             FileNotFoundException, IOException
    //--------------------------------------------------------------------------
    {
-      return start(port, root, null, keystore, password);
+      return start(port, root, null, keystore, password, "SSL");
+   }
+
+   /**
+    * Start an HTTPS server on the supplied port using the
+    * supplied root as the root URI path and the supplied keystore and password
+    * for SSL certificates.
+    * @param port The TCP port for the server
+    * @param root The root URI path. The first character of path must be '/'.
+    * @param authenticator The Authenticator derived class to use for
+    * authentication.
+    * @see com.sun.net.httpserver.Authenticator or
+    * @link http://java.sun.com/javase/6/docs/jre/api/net/httpserver/spec/overview-summary.html
+    * @param keystore SSL certificate keystore
+    * @param password SSL certificate
+    * @return true if the server started successfully otherwise false
+    * @throws java.security.KeyStoreException
+    * @throws java.security.NoSuchAlgorithmException
+    * @throws java.security.cert.CertificateException
+    * @throws java.security.UnrecoverableKeyException
+    * @throws java.security.KeyManagementException
+    * @throws java.lang.NoSuchFieldException
+    * @throws java.io.FileNotFoundException
+    * @throws java.io.IOException
+    * @see javax.net.ssl.SSLContext
+    */
+   public boolean start(int port, String root, Authenticator authenticator,
+            String keystore, String password) throws KeyStoreException,
+            NoSuchAlgorithmException, CertificateException,
+            UnrecoverableKeyException, KeyManagementException,
+            NoSuchFieldException, FileNotFoundException, IOException
+   //--------------------------------------------------------------------------
+   {
+      return start(port, root, authenticator, keystore, password, "SSL");
    }
 
    /**
@@ -517,7 +557,8 @@ abstract public class Httpd implements HttpHandleable, Postable
     * @see com.sun.net.httpserver.Authenticator or 
     * @link http://java.sun.com/javase/6/docs/jre/api/net/httpserver/spec/overview-summary.html
     * @param keystore SSL certificate keystore
-    * @param password SSL certificate 
+    * @param password SSL certificate
+    * @param SSL encryption type (SSL, TLS, SSLv3)
     * @return true if the server started successfully otherwise false
     * @throws java.security.KeyStoreException 
     * @throws java.security.NoSuchAlgorithmException 
@@ -530,24 +571,30 @@ abstract public class Httpd implements HttpHandleable, Postable
     * @see javax.net.ssl.SSLContext
     */
    public boolean start(int port, String root, Authenticator authenticator,
-            String keystore, String password) throws KeyStoreException,
+            String keystore, String password, final String sslType) throws KeyStoreException,
             NoSuchAlgorithmException, CertificateException,
             UnrecoverableKeyException, KeyManagementException,
             NoSuchFieldException, FileNotFoundException, IOException
    //--------------------------------------------------------------------------
    {
-      SSLContext ssl = onCreateSSLConfiguration(keystore, password);
+      SSLContext ssl = onCreateSSLConfiguration(keystore, password, sslType);
       if (ssl == null) return false;
       
-      m_http = HttpsServer.create(new InetSocketAddress(port), 20);      
-      ((HttpsServer) m_http).setHttpsConfigurator(new HttpsConfigurator(ssl)
+      m_http = HttpsServer.create(new InetSocketAddress(port), 20);
+      HttpsConfigurator configurator = new HttpsConfigurator(ssl)
       {
+
+         @Override
          public void configure(HttpsParameters params)
          {
-            SSLContext c = getSSLContext();            
+            SSLContext c = getSSLContext();
+            params.setNeedClientAuth(false);
+            params.setWantClientAuth(false);
             onSetSSLParameters(c, params);
          }
-      });
+      };
+
+      ((HttpsServer) m_http).setHttpsConfigurator(configurator);
       m_http.setExecutor(onCreateExecutor());
       m_requestHandler = onCreateRequestHandler();
       m_context = m_http.createContext(root, m_requestHandler);
@@ -556,6 +603,129 @@ abstract public class Httpd implements HttpHandleable, Postable
       m_port = port;
       m_isStarted = true;
       return true;
+   }
+
+   public java.io.File createKeystore(String sslType)
+          throws NoSuchAlgorithmException, KeyStoreException, FileNotFoundException, IOException,
+                 CertificateException, UnrecoverableKeyException, KeyManagementException
+   //---------------------------------------------------------------------------------------------
+   {
+      return createKeystore(sslType, null, "*", null);
+   }
+
+   final static public String DEFAULT_KEYSTORE_PASSWORD = "stupidwasteoftime";
+
+  /*
+   * Attempts to create a SSL certificate file
+  */
+   public java.io.File createKeystore(String sslType, java.io.File keyStoreFile, String host,
+                                      String password)
+   //---------------------------------------------------------------------------------------------
+   {
+      if (password == null)
+         password = DEFAULT_KEYSTORE_PASSWORD;
+      
+      final boolean isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
+      if (keyStoreFile == null)
+      {
+         String home = System.getProperty("user.home", System.getProperty("user.dir", null));
+         java.io.File homeDir = new java.io.File(home, ((isWindows) ? "" : ".") + "HttpBase4J");
+         keyStoreFile = new java.io.File(homeDir, "ssl-cert");
+      }
+      String jdkHome = System.getProperty("java.home", null);
+      java.io.File binDir = new java.io.File(jdkHome, "bin");
+      java.io.File keytool = null;
+      if (isWindows)
+         keytool = new java.io.File(binDir, "keytool.exe");
+      else
+         keytool = new java.io.File(binDir, "keytool"); // mac ?
+      if (! keytool.exists())
+      {
+         java.io.File old = keytool;
+         keytool = new java.io.File(binDir, "jre");
+         keytool = new java.io.File(binDir, "keytool");
+         if (! keytool.exists())
+         {
+            Httpd.Log(LogLevel.ERROR, "Could not find keytool executable in. Tried " +
+                      old.getAbsolutePath() + " and " + keytool.getAbsolutePath(), null);
+            return null;
+         }
+      }
+
+      Runtime r = Runtime.getRuntime();
+      Process p = null;
+      
+      if (keyStoreFile.isDirectory())
+         Http.deleteDir(keyStoreFile);
+      else
+         keyStoreFile.delete();
+      keyStoreFile.mkdirs();
+      keyStoreFile = new java.io.File(keyStoreFile, "ssl-key");
+      keyStoreFile.delete();
+
+      String command = keytool.getAbsolutePath() +
+                       " -selfcert -keystore " + keyStoreFile.getAbsolutePath() +
+                       " -genkey -dname cn=" + host + ",ou=AlQueada,o=AlQueada,c=US " +
+                       "-alias HttpdBase4J -keyalg RSA " +
+                       "-storepass " + password + " -keypass " + password;
+      StringBuilder stdout = new StringBuilder(),stderr = new StringBuilder();
+      if (r != null)
+      {
+         BufferedReader input = null, error = null;
+         int status = 1;
+         try
+         {
+            p = r.exec(command);
+            input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String line;
+            if (stdout != null) while ((line = input.readLine()) != null)
+               stdout.append(line);
+            if (stderr != null) while ((line = error.readLine()) != null)
+               stderr.append(line);
+            p.waitFor();
+            status = p.exitValue();
+            if (status != 0)
+            {
+               Httpd.Log(LogLevel.ERROR, "Error creating SSL certificate:" +
+                                         System.getProperty("line.separator") +
+                                         command +
+                                         System.getProperty("line.separator") +
+                                         stdout.toString() +
+                                         System.getProperty("line.separator") +
+                                         stderr.toString(), null);
+               return null;
+            }
+         }
+         catch (Exception e)
+         {
+            Httpd.Log(LogLevel.ERROR, "Exception creating SSL certificate: " +
+                      command +
+                      System.getProperty("line.separator") +
+                      stdout.toString() +
+                      System.getProperty("line.separator") +
+                      stderr.toString(), null);
+            return null;
+         }
+         finally
+         {
+            if (input != null) try { input.close(); } catch (Exception e) {}
+            if ( error != null) try { error.close(); } catch (Exception e) {}            
+         }
+      }
+
+      // keytool -selfcert -keystore cert/ssl-key -genkey
+      //         -dname "cn=Ossama,ou=AlQueada,o=AlQueada,c=US"
+      //         -alias HttpdBase4J -keyalg RSA -storepass mypassword -keypass mypassword
+      if (! keyStoreFile.exists())
+      {
+         Httpd.Log(LogLevel.ERROR, "Error creating keystore file " + keyStoreFile.getAbsolutePath(),
+                   null);
+         return null;
+      }
+      System.setProperty("javax.net.ssl.trustStore", keyStoreFile.getAbsolutePath());
+      System.setProperty("javax.net.ssl.trustStorePassword", password);
+      return keyStoreFile;
    }
 
    /**
@@ -570,90 +740,53 @@ abstract public class Httpd implements HttpHandleable, Postable
     * @throws java.security.cert.CertificateException 
     * @throws java.security.UnrecoverableKeyException 
     * @throws java.security.KeyManagementException 
-    */
-   protected SSLContext onCreateSSLConfiguration(String keystore, String password) 
-             throws NoSuchAlgorithmException, KeyStoreException, FileNotFoundException, 
-             IOException, CertificateException, UnrecoverableKeyException,
-             KeyManagementException
-   //------------------------------------------------------------------------
+    */   
+   protected SSLContext onCreateSSLConfiguration(String keystore, String password, String sslType)
+             throws NoSuchAlgorithmException, KeyStoreException, FileNotFoundException, IOException,
+                    CertificateException, UnrecoverableKeyException, KeyManagementException
+   //-----------------------------------------------------------------------------------------------
    {
       SSLContext ssl = null;
+      if ( (password == null) || (password.length() < 6) )
+         password = DEFAULT_KEYSTORE_PASSWORD;
+      if (sslType == null)
+         sslType = "SSL";
       if (keystore == null)
-      {  // See TODO: HttpdBase4J-00001 below
-         java.io.File certificate = null;
-         String home = System.getProperty("java.home", null);
-         java.io.File homeDir = new java.io.File(home);
-         java.io.File binDir = new java.io.File(home, "bin");
-         java.io.File keytool = null;
-         if (System.getProperty("os.name").toLowerCase().contains("windows"))
-            keytool = new java.io.File(binDir, "keytool.exe");
-         else
-            keytool = new java.io.File(binDir, "keytool");
-         Runtime r = Runtime.getRuntime();
-         Process p = null;
-         certificate = new java.io.File("cert");
-         certificate.mkdirs();
-         certificate = new java.io.File(certificate, "ssl-key");
-         certificate.delete();
-         if ( (password == null) || (password.length() <= 6) ) 
-            password = "stupidwasteoftime";
-         String command = keytool.getAbsolutePath() +   
-                          " -selfcert -keystore " + certificate.getAbsolutePath() + 
-                          " -genkey -dname cn=Ossama,ou=AlQueada,o=AlQueada,c=US " + 
-                          "-alias HttpdBase4J -keyalg RSA " +
-                          "-storepass " + password + " -keypass " + password;
-         StringBuilder stdout = new StringBuilder(),stderr = new StringBuilder();
-         if (r != null)
-         {
-            BufferedReader input = null, error = null;            
-            int status = 1;
-            try
-            {
-               p = r.exec(command);
-               input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-               error = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-               String line;
-               if (stdout != null) while ((line = input.readLine()) != null)
-                  stdout.append(line);
-               if (stderr != null) while ((line = error.readLine()) != null)
-                  stderr.append(line);
-               p.waitFor();
-               status = p.exitValue();
-               if (status != 0)
-               {
-                  Httpd.Log(LogLevel.ERROR, "Error creating SSL certificate:" + 
-                                            System.getProperty("line.separator") +
-                                            command + 
-                                            System.getProperty("line.separator") +
-                                            stdout.toString() +
-                                            System.getProperty("line.separator") +
-                                            stderr.toString(), null);
-                  return null;
-               }
-            }
-            catch (Exception e)
-            {
-               Httpd.Log(LogLevel.ERROR, "Exception creating SSL certificate:" + 
-                         System.getProperty("line.separator") +
-                         command + 
-                         System.getProperty("line.separator") +
-                         e.getMessage() + System.getProperty("line.separator") +
-                         stdout.toString() +
-                         System.getProperty("line.separator") +
-                         stderr.toString(), null);
-               return null;
-            }
-            finally
-            {
-               if (input != null) try { input.close(); } catch (Exception e) {}
-               if ( error != null) try { error.close(); } catch (Exception e) {}
-               keystore = certificate.getAbsolutePath(); 
-            }
-         }         
+      {         
+//         TrustManager[] trustAllCerts = new TrustManager[]
+//         //===============================================
+//         {
+//            new X509TrustManager()
+//            {
+//               @Override
+//               public java.security.cert.X509Certificate[] getAcceptedIssuers() { return null; }
+//
+//               @Override
+//               public void checkClientTrusted(
+//                        java.security.cert.X509Certificate[] certs, String authType) {}
+//
+//               @Override
+//               public void checkServerTrusted(
+//                        java.security.cert.X509Certificate[] certs, String authType) {}
+//            }
+//         };
+//         SSLContext sc = SSLContext.getInstance("SSL");
+//         //SSLContext sc = SSLContext.getInstance("TLS");
+//         sc.init(null, trustAllCerts, new SecureRandom());
+//         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//         //ssl = SSLContext.getInstance("SSLv3");
+//         //ssl = SSLContext.getInstance("TLS");
+//         //ssl.init(null, trustAllCerts, new java.security.SecureRandom());
+//         //HttpsURLConnection.setDefaultSSLSocketFactory(ssl.getSocketFactory());
+//         HttpsURLConnection.setDefaultHostnameVerifier(
+//         new HostnameVerifier()
+//         {
+//            @Override
+//            public boolean verify(String host, SSLSession sslSession) {  return true; }
+//         });
+         keystore = createKeystore(sslType, null, "*", password).getAbsolutePath();
       }
-      // keytool -selfcert -keystore cert/ssl-key -genkey    
-      //         -dname "cn=Ossama,ou=AlQueada,o=AlQueada,c=US" 
-      //         -alias HttpdBase4J -keyalg RSA -storepass mypassword -keypass mypassword
+
       char[] passphrase = password.toCharArray();
       KeyStore ks = KeyStore.getInstance("JKS");
       ks.load(new FileInputStream(keystore), passphrase);
@@ -661,75 +794,10 @@ abstract public class Httpd implements HttpHandleable, Postable
       kmf.init(ks, passphrase);
       TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
       tmf.init(ks);
-      ssl = SSLContext.getInstance("TLS");
+      ssl = SSLContext.getInstance(sslType);
       ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
       return ssl;
-   }
-   
-   /* TODO: HttpdBase4J-00001 Setting up a TrustManager to trust all certificates 
-    * does not appear to work. 
-   protected SSLContext onCreateSSLConfiguration(String keystore,
-            String password) throws NoSuchAlgorithmException,
-            KeyStoreException, FileNotFoundException, IOException,
-            CertificateException, UnrecoverableKeyException,
-            KeyManagementException
-   //------------------------------------------------------------------------
-   {
-      SSLContext ssl = null;
-      if (keystore == null)
-      {         
-         try 
-         {
-            new URL("https://0.0.0.0/").getContent();
-         } 
-         catch (IOException guaranteedException) { }
-         TrustManager[] trustAllCerts = new TrustManager[] { 
-         new X509TrustManager()
-         {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers()
-            {
-               return null;
-            }
-
-            public void checkClientTrusted(
-                     java.security.cert.X509Certificate[] certs, String authType)
-            {}
-
-            public void checkServerTrusted(
-                     java.security.cert.X509Certificate[] certs, String authType)
-            {}
-         } };         
-         ssl = SSLContext.getInstance("SSLv3");
-         //ssl = SSLContext.getInstance("TLS");
-         ssl.init(null, trustAllCerts, new java.security.SecureRandom());
-         HttpsURLConnection.setDefaultSSLSocketFactory(ssl.getSocketFactory());
-         HttpsURLConnection.setDefaultHostnameVerifier(
-         new HostnameVerifier()
-         {
-            public boolean verify(String host, SSLSession sslSession)
-            {
-               return true;
-            }
-            
-         }); 
-      }
-      else
-      {
-         // keytool -selfcert -keystore cert/ssl-key -genkey    
-         //         -dname "cn=Me,ou=ALQueada,o=AlQueada, c=US" 
-         //         -alias HttpdBase4J -keyalg RSA
-         char[] passphrase = password.toCharArray();
-         KeyStore ks = KeyStore.getInstance("JKS");
-         ks.load(new FileInputStream(keystore), passphrase);
-         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
-         kmf.init(ks, passphrase);
-         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
-         tmf.init(ks);
-         ssl = SSLContext.getInstance("TLS");
-         ssl.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
-      }
-      return ssl;
-   } */
+   } 
 
    /** Called every time a HTTPS connection is made to set the SSL 
     * parameters. Overide to customize these parameters.
@@ -842,10 +910,11 @@ abstract public class Httpd implements HttpHandleable, Postable
     * @param request The Request instance
     * @return A String ncontaining the HTML for the directory listing output.
     */
+   @Override
    public String onListDirectory(Request request)
    //--------------------------------------------
    {
-      StringBuffer html = new StringBuffer("<html><head><title>"
+      StringBuilder html = new StringBuilder("<html><head><title>"
                + "Directory listing: " + request.getURI().toASCIIString()
                + "</title></head><body>");
       html.append("<H1>");
@@ -882,6 +951,7 @@ abstract public class Httpd implements HttpHandleable, Postable
       return html.toString();
    }
    
+   @Override
    public boolean onIsCacheable(long id, HttpExchange ex, Request request)
    //---------------------------------------------------------------------
    {
@@ -889,36 +959,43 @@ abstract public class Httpd implements HttpHandleable, Postable
       return request.isCacheable();
    }
    
+   @Override
    public java.io.File onGetCachedFile(long id, HttpExchange ex, Request request)
    //--------------------------------------------------------------------
    {
       return null;
    }
    
+   @Override
    public boolean onPreServe(long id, HttpExchange ex, Request request)
    {
       return true;
    }
 
+   @Override
    public HttpResponse onServeHeaders(long id, HttpExchange ex, Request request)
    {
       return null;
    }
 
+   @Override
    public InputStream onServeBody(long id, HttpExchange ex, Request request)
    {
       return null;
    }
 
+   @Override
    public void onPostServe(long id, HttpExchange ex, Request request,
             boolean isOK)
    {}
 
+   @Override
    public Request onFileNotFound(long id, HttpExchange ex, Request request)
    {
       return null;
    }
 
+   @Override
    public Object onHandlePost(long id, HttpExchange ex, Request request,
             HttpResponse response, java.io.File dir, Object... extraParameters)
    {

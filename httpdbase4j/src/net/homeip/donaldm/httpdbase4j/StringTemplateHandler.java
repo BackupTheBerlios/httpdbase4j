@@ -190,6 +190,7 @@ abstract public class StringTemplateHandler
     */
    public boolean getCacheable() { return m_isCacheable; } 
    
+   @Override
    public HttpResponse onServeHeaders(long id, HttpExchange ex, Request request)
    //---------------------------------------------------------------------------
    {
@@ -296,6 +297,7 @@ abstract public class StringTemplateHandler
    /**
   * @inheritDoc
   */
+   @Override
    public InputStream onServeBody(long id, HttpExchange ex, Request request)
   //---------------------------------------------------------------------------
    {
@@ -345,6 +347,7 @@ abstract public class StringTemplateHandler
     * @param  template The template
     * @param request The Request instance.
     * @return The file generated from the template.   */
+   @Override
    public File templateFile(StringTemplate template, Request request, 
                             StringBuffer mimeType, File dir)
    //----------------------------------------------------------------------
@@ -366,6 +369,7 @@ abstract public class StringTemplateHandler
     * @param  template The template
     * @param request The Request instance.
     * @return The String generated from the template.   */
+   @Override
    public String templateString(StringTemplate template, Request request, 
                                 StringBuffer mimeType)
    //-------------------------------------------------------------------------
@@ -393,6 +397,7 @@ abstract public class StringTemplateHandler
     * @param  template The template
     * @param request The Request instance.
     * @return The InputStream generated from the template.   */
+   @Override
    public InputStream templateStream(StringTemplate template, Request request, 
                                      StringBuffer mimeType)
    //-------------------------------------------------------------------------
@@ -404,22 +409,26 @@ abstract public class StringTemplateHandler
    }
    
    
+   @Override
    public boolean onPreServe(long id, HttpExchange ex, Request request)
    //------------------------------------------------------------------
    {
       return true;
    }
 
+   @Override
    public void onPostServe(long id, HttpExchange ex, Request request,
                            boolean isOK)
    {
    }
 
+   @Override
    public Request onFileNotFound(long id, HttpExchange ex, Request request)
    {
       return null;
    }
 
+   @Override
    public Object onHandlePost(long id, HttpExchange ex, Request request, 
                             HttpResponse response, File dir, 
                             Object... extraParameters)
@@ -442,6 +451,7 @@ abstract public class StringTemplateHandler
 
    }
 
+   @Override
    public String onListDirectory(Request request)
    {
       return m_httpd.onListDirectory(request);

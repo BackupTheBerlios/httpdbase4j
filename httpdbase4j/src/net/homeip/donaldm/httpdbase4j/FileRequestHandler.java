@@ -200,7 +200,7 @@ public class FileRequestHandler extends RequestHandler implements HttpHandler
                if (m_verbose)
                   Httpd.Log(Httpd.LogLevel.INFO, "Request " + 
                             request.getURI().toASCIIString() + 
-                            " not found", null);
+                            " not found (" + request + ")", null);
                Request newRequest = handler.onFileNotFound(id, ex, request);            
                if ( (newRequest == null) ||  (! newRequest.exists()) )
                {

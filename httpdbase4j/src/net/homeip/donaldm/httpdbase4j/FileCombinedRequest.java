@@ -204,5 +204,11 @@ public class FileCombinedRequest extends CombinedRequest implements Cloneable
       m_eTag = Http.eTag(items);
       return m_eTag;
    }
-   
+
+   @Override
+   public String toString()
+   {
+      return "FileCombinedRequest{" + "m_homeDir=" + m_homeDir + "m_requestFiles=" + m_requestFiles + '}'
+             + " " + super.toString();
+   }
 }

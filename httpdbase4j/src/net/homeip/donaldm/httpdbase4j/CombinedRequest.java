@@ -190,9 +190,9 @@ abstract public class CombinedRequest extends Request implements Cloneable
     */
    abstract protected void addFile(String file);
       
-   public boolean isDirectory()  { return false; }
+   @Override public boolean isDirectory()  { return false; }
 
-   abstract public Date getDate();
+   @Override abstract public Date getDate();
    
     /**
     *  @inheritDoc
@@ -285,42 +285,50 @@ abstract public class CombinedRequest extends Request implements Cloneable
       return m_extension;
    }
    
+   @Override
    public String getAbsolutePath()
    {
       throw new UnsupportedOperationException("Not supported.");
    }
 
+   @Override
    public String getName()
    {
       throw new UnsupportedOperationException("Not supported.");
    }
 
+   @Override
    public String getDir()
    {
       throw new UnsupportedOperationException("Not supported.");
    }
 
+   @Override
    public Request getDirRequest()
    {
       throw new UnsupportedOperationException("Not supported.");
    }
 
+   @Override
    public Request getChildRequest(String name)
    {
       throw new UnsupportedOperationException("Not supported.");
    }
 
+   @Override
    protected HttpHandleable getHandler()
    //-----------------------------------
    {
       return m_httpd;
    }
 
+   @Override
    protected Postable getPostHandler()
    {
       throw new UnsupportedOperationException("Not supported.");
    }
 
+   @Override
    public TreeSet<DirItemInterface> getDirListFiles(SORTBY sortBy)
    {
       throw new UnsupportedOperationException("Not supported.");
@@ -332,6 +340,7 @@ abstract public class CombinedRequest extends Request implements Cloneable
       throw new UnsupportedOperationException("Not supported.");
    }
 
+   @Override
    public TreeSet<DirItemInterface> getDirListDirectories(SORTBY sortBy)
    {
       throw new UnsupportedOperationException("Not supported.");
@@ -410,12 +419,14 @@ abstract public class CombinedRequest extends Request implements Cloneable
       return true;
    }
 
+   @Override
    public String getETag(boolean refresh)
    //------------------------------------
    {
       throw new UnsupportedOperationException("Not supported");
    }
 
+   @Override
    public long getSize()
    {
       throw new UnsupportedOperationException("Not supported yet.");

@@ -42,6 +42,7 @@ public class TemplatableAdapter implements Templatable
     * @param request The Request instance
     * @return A temporary file of the contents of the template output or null.
     */
+   @Override
    public File templateFile(StringTemplate template, Request request, 
                             StringBuffer mimeType, File dir)
    //---------------------------------------------------------------------
@@ -84,6 +85,7 @@ public class TemplatableAdapter implements Templatable
     * @param request The Request instance
     * @return A string representing the contents of the template output or null.
     */
+   @Override
    public String templateString(StringTemplate template, Request request, 
                                 StringBuffer mimeType)
    //-----------------------------------------------------------------------
@@ -109,6 +111,7 @@ public class TemplatableAdapter implements Templatable
     * @param request The Request instance
     * @return A stream representing the contents of the template output or null.
     */
+   @Override
    public InputStream templateStream(StringTemplate template, Request request, 
                                      StringBuffer mimeType)
    //--------------------------------------------------------------------------

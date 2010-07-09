@@ -114,6 +114,7 @@ public class FileHttpd  extends Httpd implements HttpHandleable, Postable
     * Get the home directory in the file system as a String.
     * @return Home directory 
    */
+   @Override
    public String getHomePath() { return m_httpHomeDir.getAbsolutePath(); }
    
    /**
@@ -126,5 +127,11 @@ public class FileHttpd  extends Httpd implements HttpHandleable, Postable
    //--------------------------------------------
    {
       return new FileRequestHandler(this, m_httpHomeDir, m_isVerbose);
+   }
+
+   @Override
+   public String toString()
+   {
+      return "FileHttpd{" + "m_httpHomeDir=" + m_httpHomeDir + '}';
    }
 }

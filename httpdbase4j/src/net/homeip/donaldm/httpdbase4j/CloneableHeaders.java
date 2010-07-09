@@ -58,6 +58,7 @@ public class CloneableHeaders extends Headers implements Cloneable
    /**
     *  @inheritDoc
     */
+   @Override
    protected Object clone() throws CloneNotSupportedException
    //--------------------------------------------------------
    {

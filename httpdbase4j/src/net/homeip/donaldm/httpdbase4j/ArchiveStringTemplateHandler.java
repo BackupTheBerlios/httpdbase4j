@@ -283,6 +283,7 @@ public class ArchiveStringTemplateHandler extends StringTemplateHandler
       return super.onHandlePost(id, ex, request, response, dir, extraParameters);
    }
 
+   @Override
    public java.io.File templateFile(StringTemplate template, Request request, 
                             StringBuffer mimeType, java.io.File dir)
    //----------------------------------------------------------------
@@ -290,6 +291,7 @@ public class ArchiveStringTemplateHandler extends StringTemplateHandler
       return super.templateFile(template, request, mimeType, dir);
    }
 
+   @Override
    public String templateString(StringTemplate template, Request request, 
                                 StringBuffer mimeType)
    //--------------------------------------------------------------------
@@ -297,6 +299,7 @@ public class ArchiveStringTemplateHandler extends StringTemplateHandler
       return super.templateString(template, request, mimeType);
    }
 
+   @Override
    public InputStream templateStream(StringTemplate template, Request request, 
                                      StringBuffer mimeType)
    //-------------------------------------------------------------------------

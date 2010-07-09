@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
+import org.antlr.stringtemplate.language.DefaultTemplateLexer;
+
 
 /**
  * Handler for StringTemplate requests from a local filesystem.
@@ -48,8 +50,8 @@ public class FileStringTemplateHandler extends StringTemplateHandler
    //----------------------------------------------------------------------
    {
       super(httpd, templateJavaPackage);
-      m_templateGroup = new StringTemplateGroup("StringTemplateDir",
-                                                m_httpd.getHomePath());
+      m_templateGroup = new StringTemplateGroup("StringTemplateDir", m_httpd.getHomePath(),
+                                                DefaultTemplateLexer.class);
    }
    
    /**
@@ -65,8 +67,8 @@ public class FileStringTemplateHandler extends StringTemplateHandler
    //----------------------------------------------------------------------
    {
       super(httpd, templateProcessor);
-      m_templateGroup = new StringTemplateGroup("StringTemplateDir",
-                                                m_httpd.getHomePath());
+      m_templateGroup = new StringTemplateGroup("StringTemplateDir", m_httpd.getHomePath(),
+                                                DefaultTemplateLexer.class);
    }
    
    /**
@@ -162,6 +164,7 @@ public class FileStringTemplateHandler extends StringTemplateHandler
     * StringTemplateHandler derived classes default to returning false to 
     * force no caching.
     */
+   @Override
    public boolean onIsCacheable(long id, HttpExchange ex, Request request)
    //---------------------------------------------------------------------
    {

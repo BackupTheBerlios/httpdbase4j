@@ -341,10 +341,10 @@ public class Http
    static protected String strExchange(HttpExchange ex)
    //------------------------------------------------
    {
-      StringBuffer sb = new StringBuffer();
+      StringBuilder sb = new StringBuilder();
       if (ex != null)
       {
-         sb.append("Method: " + ex.getRequestMethod());
+         sb.append("Method: ").append(ex.getRequestMethod());
          sb.append(Httpd.EOL);
          Headers headerMap = ex.getRequestHeaders();
          Set<Map.Entry<String,List<String>>> headers = headerMap.entrySet();
@@ -352,22 +352,22 @@ public class Http
          i.hasNext();)
          {
             Map.Entry<String,List<String>> e = i.next();
-            sb.append("Header: " + e.getKey() + ": ");
+            sb.append("Header: ").append(e.getKey()).append(": ");
             List<String> hv = e.getValue();
             for (Iterator<String> j=hv.iterator(); j.hasNext();)
-               sb.append(j.next() + " ");
+               sb.append(j.next()).append(" ");
             sb.append(Httpd.EOL);
          }
          URI uri = ex.getRequestURI().normalize();
          if (uri != null)
          {
             sb.append(uri.toASCIIString());
-            sb.append("Path " + uri.getPath()); sb.append(Httpd.EOL);
-            sb.append("Host " + uri.getHost()); sb.append(Httpd.EOL);
-            sb.append("Port " + uri.getPort()); sb.append(Httpd.EOL);
-            sb.append("Fragment " + uri.getFragment()); sb.append(Httpd.EOL);
-            sb.append("Query " + uri.getQuery()); sb.append(Httpd.EOL);
-            sb.append("Scheme " + uri.getScheme()); sb.append(Httpd.EOL);
+            sb.append("Path ").append(uri.getPath()); sb.append(Httpd.EOL);
+            sb.append("Host ").append(uri.getHost()); sb.append(Httpd.EOL);
+            sb.append("Port ").append(uri.getPort()); sb.append(Httpd.EOL);
+            sb.append("Fragment ").append(uri.getFragment()); sb.append(Httpd.EOL);
+            sb.append("Query ").append(uri.getQuery()); sb.append(Httpd.EOL);
+            sb.append("Scheme ").append(uri.getScheme()); sb.append(Httpd.EOL);
          }
 //         InputStream is = null;
 //         sb.append("Content:"); sb.append(nl);
@@ -428,7 +428,7 @@ public class Http
             }            
          }
          byte digest[] = messageDigest.digest();
-         StringBuffer sb = new StringBuffer(digest.length * 2 + 16);
+         StringBuilder sb = new StringBuilder(digest.length * 2 + 16);
          for (int i = 0; i < digest.length; i++) 
          {
             int v = digest[i] & 0xff;
@@ -449,5 +449,28 @@ public class Http
          if (bis != null)
             try { bis.close(); } catch (Exception e) {}
       }
+   }
+
+   static public boolean deleteDir(java.io.File dir)
+   //---------------------------------------
+   {  // a symbolic link has a different canonical path than its actual path,
+      // unless it's a link to itself
+      java.io.File candir;
+      try { candir = dir.getCanonicalFile(); } catch (IOException e) { return false; }
+      if (!candir.equals(dir.getAbsoluteFile()))
+         return false;
+
+      java.io.File[] files = candir.listFiles();
+      if (files != null)
+         {  for (int i = 0; i < files.length; i++)
+               {  java.io.File file = files[i];
+                  boolean deleted = file.delete();
+                  if (! deleted)
+                     if (file.isDirectory())
+                        deleteDir(file);
+
+               }
+         }
+      return dir.delete();
    }
 }

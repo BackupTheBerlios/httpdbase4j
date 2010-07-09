@@ -264,5 +264,5 @@ abstract public class RequestHandler implements HttpHandler
    /* (non-Javadoc)
     * @see com.sun.net.httpserver.HttpHandler#handle(com.sun.net.httpserver.HttpExchange)
     */
-   abstract public void handle(HttpExchange exchange) throws IOException;
+   @Override abstract public void handle(HttpExchange exchange) throws IOException;
 }

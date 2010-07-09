@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 
 import org.antlr.stringtemplate.StringTemplate;
 import org.antlr.stringtemplate.StringTemplateGroup;
+import org.antlr.stringtemplate.language.DefaultTemplateLexer;
 
 import de.schlichtherle.io.File;
 import de.schlichtherle.io.FileInputStream;
@@ -46,14 +47,15 @@ public class ArchiveStringTemplateGroup extends StringTemplateGroup
       super(name, 
             (jarDirectory.getEnclArchive() == null) 
                ? jarDirectory.getAbsolutePath()
-               : jarDirectory.getEnclArchive().getAbsolutePath());
+               : jarDirectory.getEnclArchive().getAbsolutePath(),
+               DefaultTemplateLexer.class);
       m_jarDirectory = jarDirectory;
    }
    
    public ArchiveStringTemplateGroup(String name, java.io.File jarDirectory)
    //--------------------------------------------------------------------
    {
-      super(name, jarDirectory.getAbsolutePath());
+      super(name, jarDirectory.getAbsolutePath(), DefaultTemplateLexer.class);
       m_jarDirectory = new File(jarDirectory);
    }
    
@@ -62,7 +64,7 @@ public class ArchiveStringTemplateGroup extends StringTemplateGroup
                                  String archiveDir)
    //-----------------------------------------------------------
    {
-      super(name, archiveFile.getAbsolutePath());
+      super(name, archiveFile.getAbsolutePath(), DefaultTemplateLexer.class);
       m_jarDirectory = new File(archiveFile, archiveDir);
    }
    
@@ -70,7 +72,7 @@ public class ArchiveStringTemplateGroup extends StringTemplateGroup
                                  String archiveDir)
    //-----------------------------------------------------------
    {
-      super(name, archiveFile.getAbsolutePath());
+      super(name, archiveFile.getAbsolutePath(), DefaultTemplateLexer.class);
       m_jarDirectory = new File(archiveFile, archiveDir);
    }
    

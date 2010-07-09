@@ -122,7 +122,8 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
    {
       super(request);
       m_homeDir = homeDir;
-      String home = m_homeDir.getAbsolutePath();
+      String home;
+      try { home = m_homeDir.getCanonicalPath(); } catch (IOException _e) { home = m_homeDir.getAbsolutePath(); }
       String filePath = "";
       if (f != null)
          filePath = f.getPath();
@@ -137,6 +138,8 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
             requestResource = request.getDir();
          filePath = filePath.replaceFirst("\\.", requestResource);
       }
+      java.io.File ff = new java.io.File(filePath);
+      try { filePath = ff.getCanonicalPath(); } catch (IOException _e) { filePath = ff.getAbsolutePath(); }
       if (filePath.startsWith(home))
       {
          if (filePath.length() > home.length())
@@ -346,14 +349,15 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
 
       public DirItem(File f)  {  m_file = f; }
 
-      public String getName()  { return m_file.getPath();   }
+      @Override public String getName()  { return m_file.getPath();   }
 
-      public long getSize() { return m_file.length(); }
+      @Override public long getSize() { return m_file.length(); }
 
-      public Date getDate() { return new Date(m_file.lastModified()); }
+      @Override public Date getDate() { return new Date(m_file.lastModified()); }
 
-      public boolean isDirectory() { return m_file.isDirectory();  }
+      @Override public boolean isDirectory() { return m_file.isDirectory();  }
       
+      @Override
       public InputStream getStream()
       {
          try
@@ -364,6 +368,12 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
          {
             return null;
          }
+      }
+
+      @Override
+      public String toString()
+      {
+         return "DirItem{" + "m_file=" + ((m_file == null) ? "null" : m_file.getAbsolutePath()) + '}';
       }
    }
 
@@ -387,6 +397,7 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
    {
       File[] files = directory.listFiles(new FileFilter()
       {
+         @Override
          public boolean accept(File f)
          {
             if (isDirs)
@@ -400,6 +411,7 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
       new Comparator<DirItemInterface>()
       //--------------------------------
       {
+         @Override
          public int compare(DirItemInterface di1, DirItemInterface di2)
          {
             switch (sortBy)
@@ -494,6 +506,7 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
    /**
     *  @inheritDoc
     */
+   @Override
    public Object clone() throws CloneNotSupportedException
    //-----------------------------------------------------
    {
@@ -554,24 +567,24 @@ public class FileRequest extends Request implements DirItemInterface, Cloneable
    }
    
    @Override
-   public String toString()
-   //----------------------
-   {
-      StringBuffer sb = new StringBuffer();
-      sb.append("Base :" + m_homeDir.getAbsolutePath()); sb.append(Httpd.EOL);
-      sb.append("Path :" + m_requestFile.getAbsolutePath()); sb.append(Httpd.EOL);
-      return super.toString() + Httpd.EOL + sb.toString();
-   }
-
    public Date getDate()
    //--------------------
    {
       return new Date(m_requestFile.lastModified());
    }
 
+   @Override
    public long getSize()
    //-------------------
    {
       return m_requestFile.length();
+   }
+
+   @Override
+   public String toString()
+   //----------------------
+   {
+      return "FileRequest{" + "m_homeDir=" + m_homeDir + ", m_requestFile=" + m_requestFile + '}' +
+             " " + super.toString();
    }
 }

@@ -433,14 +433,15 @@ public class ArchiveRequest extends Request
 
       public DirItem(File f)  {  m_file = f; }
 
-      public String getName()  { return m_file.getInnerEntryName();   }
+      @Override public String getName()  { return m_file.getInnerEntryName();   }
 
-      public long getSize() { return m_file.length(); }
+      @Override public long getSize() { return m_file.length(); }
 
-      public Date getDate() { return new Date(m_file.lastModified()); }
+      @Override public Date getDate() { return new Date(m_file.lastModified()); }
 
-      public boolean isDirectory() { return m_file.isDirectory();  }
+      @Override public boolean isDirectory() { return m_file.isDirectory();  }
       
+      @Override
       public InputStream getStream()
       {
          try
@@ -475,6 +476,7 @@ public class ArchiveRequest extends Request
    {
       File[] files = (de.schlichtherle.io.File[]) directory.listFiles(new FileFilter()
       {
+         @Override
          public boolean accept(java.io.File f)
          {
             if (isDirs)
@@ -488,6 +490,7 @@ public class ArchiveRequest extends Request
       new Comparator<DirItemInterface>()
       //--------------------------------
       {
+         @Override
          public int compare(DirItemInterface di1, DirItemInterface di2)
          {
             switch (sortBy)
@@ -543,28 +546,25 @@ public class ArchiveRequest extends Request
    }
     
    @Override
-   public String toString()
-   //----------------------
-   {
-      StringBuffer sb = new StringBuffer();
-      sb.append("Base :" + ((m_homeDir == null) 
-                      ? "Unknown" : m_homeDir)); 
-      sb.append(Httpd.EOL);      
-      sb.append("Path :" + ((m_requestFile == null) ? "Unknown" 
-                                            : m_requestFile.getAbsolutePath())); 
-      sb.append(Httpd.EOL);
-      return super.toString() + Httpd.EOL + sb.toString();
-   }
-
    public Date getDate()
    //--------------------
    {
       return new Date(m_requestFile.lastModified());
    }
 
+   @Override
    public long getSize()
    //-------------------
    {
       return m_requestFile.length();
    }
+
+   @Override
+   public String toString()
+   {
+      return "ArchiveRequest{" + "m_homeDir=" + m_homeDir + "m_requestFile=" + m_requestFile + '}' +
+              " " + super.toString();
+   }
+
+
 }

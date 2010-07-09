@@ -93,6 +93,7 @@ public class ArchiveCombinedRequest extends CombinedRequest implements Cloneable
    /**
     * Add a file to the list of files for this CombinedRequest
     */
+   @Override
    protected void addFile(String file)
    //---------------------------------
    {
@@ -146,7 +147,7 @@ public class ArchiveCombinedRequest extends CombinedRequest implements Cloneable
    public String getName()
    //--------------------
    {
-      StringBuffer names = new StringBuffer();
+      StringBuilder names = new StringBuilder();
       for (int i=0;i <m_requestFiles.size(); i++)
       {         
          File f = new File(m_requestFiles.get(i).getInnerEntryName());
@@ -179,13 +180,14 @@ public class ArchiveCombinedRequest extends CombinedRequest implements Cloneable
    /**
     * @return The number of files in the combined request
     */
-   protected int getCount() { return m_requestFiles.size(); }
+   @Override protected int getCount() { return m_requestFiles.size(); }
       
    
    /**
     * @param i Index of the file for which to return an InputStream. 
     * @return An InputStream for the <i>i</i>th file in the combined request 
     */
+   @Override
    protected InputStream getItemStream(int i)
    //----------------------------------------
    {

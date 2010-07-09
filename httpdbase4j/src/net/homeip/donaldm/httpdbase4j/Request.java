@@ -830,6 +830,7 @@ abstract public class Request implements DirItemInterface
     * Implementation of Cloneable interface for Request
     * @return The cloned Request
     */
+   @Override
    public Object clone() throws CloneNotSupportedException
    //-----------------------------------------------------
    {
@@ -857,10 +858,10 @@ abstract public class Request implements DirItemInterface
          i.hasNext();)
          {
             Map.Entry<String,List<String>> e = i.next();
-            sb.append(e.getKey() + ": ");
+            sb.append(e.getKey()).append(": ");
             List<String> hv = e.getValue();
             for (Iterator<String> j=hv.iterator(); j.hasNext();)
-               sb.append(j.next() + " ");
+               sb.append(j.next()).append(" ");
             sb.append(Httpd.EOL);
          }
    }
@@ -872,31 +873,23 @@ abstract public class Request implements DirItemInterface
    }
    
    @Override
-   public String toString()
-   //----------------------
-   {
-      StringBuffer sb = new StringBuffer();
-      sb.append("m_path: "); sb.append(nullv(m_path)); sb.append(Httpd.EOL);
-      sb.append("m_methodString: "); sb.append(nullv(m_methodString)); sb.append(Httpd.EOL);
-      sb.append("m_encoding: "); sb.append(nullv(m_encoding)); sb.append(Httpd.EOL);
-      sb.append("m_cacheDir: "); sb.append(nullv(m_cacheDir)); sb.append(Httpd.EOL);
-      sb.append("m_cacheFile: "); sb.append(nullv(m_cacheFile)); sb.append(Httpd.EOL);
-      sb.append("m_contentLength: "); sb.append(m_contentLength); sb.append(Httpd.EOL);
-      sb.append("Exchange:"); sb.append(Httpd.EOL);
-      if (m_ex != null)
-         sb.append(Http.strExchange(m_ex));
-      sb.append("GET Parameters:"); sb.append(Httpd.EOL);
-      _appendParams(m_getParameters, sb);
-      sb.append("POST Parameters:"); sb.append(Httpd.EOL);
-      _appendParams(m_postParameters, sb);
-      
-      return super.toString() + sb.toString();
-   }
-
    protected void finalize() throws Throwable
    //----------------------------------------
    {
+      super.finalize();
       if ( (m_cacheFile == m_compressedFile) && (m_cacheFile != null) )
          m_cacheFile.delete();
-   }   
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Request {" + "m_uri=" + m_uri + ", m_path=" + m_path + ", m_requestHeaders=" +
+              m_requestHeaders + ", m_method=" + m_method + ", m_methodString=" + m_methodString +
+              ((m_isGet) ? ("[" + m_getParameters + "]") : ("[" + m_postParameters + "]")) +
+              ", m_encoding=" + m_encoding + ", m_contentLength=" + m_contentLength + ", m_compress=" +
+              m_compress + ", m_compressedFile=" + m_compressedFile + ", m_eTag=" + m_eTag +'}';
+   }
+
+
 }
