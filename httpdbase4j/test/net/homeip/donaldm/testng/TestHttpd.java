@@ -42,6 +42,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 import de.schlichtherle.io.File;
+import org.antlr.stringtemplate.language.DefaultTemplateLexer;
 
 public class TestHttpd
 //====================
@@ -161,6 +162,7 @@ public class TestHttpd
          super(homeDir, poolSize);         
       }
             
+      @Override
       public Request onFileNotFound(long id, HttpExchange ex, Request request)
       {
          if (request.getName().compareTo("no.such.file") == 0)
@@ -181,6 +183,7 @@ public class TestHttpd
          return null;
       }
       
+      @Override
       public HttpResponse onServeHeaders(long id, HttpExchange ex, Request request)
       {
          if (request.getName().compareTo("test-overide.txt") == 0)
@@ -206,6 +209,7 @@ public class TestHttpd
          return super.onServeHeaders(id, ex, request);
       }
 
+      @Override
       public InputStream onServeBody(long id, HttpExchange ex, Request request)
       {
          if (request.getName().compareTo("test-overide.txt") == 0)
@@ -337,8 +341,8 @@ public class TestHttpd
       java.io.File dir = new java.io.File(f, "templates");
       deleteDir(dir);
       dir.mkdirs();
-      StringTemplateGroup group = new StringTemplateGroup("testgroup", 
-                                                dir.getAbsolutePath());
+      StringTemplateGroup group = new StringTemplateGroup("testgroup", dir.getAbsolutePath(),
+                                                          DefaultTemplateLexer.class);
       f = new java.io.File(dir, "pagetemplate.st");
       java.io.BufferedWriter bw = new java.io.BufferedWriter(new java.io.FileWriter(f));
       bw.write(getPageTemplateHtml(true));
@@ -431,6 +435,7 @@ public class TestHttpd
             return super.templateFile(template, request, mimeType, dir);
          }
          
+         @Override
          public String templateString(StringTemplate template, Request request, 
                                       StringBuffer mimeType)
          {
@@ -438,6 +443,7 @@ public class TestHttpd
             return super.templateString(template, request, mimeType);
          }
          
+         @Override
          public InputStream templateStream(StringTemplate template, 
                                            Request request,
                                            StringBuffer mimeType)
@@ -479,8 +485,8 @@ public class TestHttpd
       URLConnection conn = url.openConnection();
       int len = conn.getContentLength();
       
-      StringTemplateGroup group = new StringTemplateGroup("testgroup", 
-                                                m_homeDir.getAbsolutePath());
+      StringTemplateGroup group = new StringTemplateGroup("testgroup", m_homeDir.getAbsolutePath(),
+                                                          DefaultTemplateLexer.class);
       StringTemplate st = group.getInstanceOf("pagetemplate");
       SelItem[] selList = new SelItem[6];
       for (int i=0; i<5; i++)
@@ -531,6 +537,7 @@ public class TestHttpd
       m_httpd.addPostHandler("/post", new Postable()
       {
 
+         @Override
          public Object onHandlePost(long id, HttpExchange ex, Request request, 
                                   HttpResponse response, java.io.File dir, 
                                   Object... extraParameters)
