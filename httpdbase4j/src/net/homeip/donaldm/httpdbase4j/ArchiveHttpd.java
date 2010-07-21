@@ -26,6 +26,7 @@ import java.net.URLClassLoader;
 
 import com.sun.net.httpserver.HttpHandler;
 import java.lang.reflect.Method;
+import java.net.URI;
 
 /**
  * Implementation of the abstract Httpd class for web content in a
@@ -284,8 +285,8 @@ public class ArchiveHttpd extends Httpd implements HttpHandleable, Postable
       //String urlPath = "jar:file://" + f.getAbsolutePath() + "!/";      
       try
       {
-         URL url = new URL("file://"  + f.getAbsolutePath() + 
-                           ((f.isDirectory()) ? "/" : ""));
+         URI uri = f.toURI();
+         URL url = uri.toURL();
          Method method = sysclass.getDeclaredMethod("addURL", parameters);
          method.setAccessible(true);
          
